@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "566183574390",
+    "project_id": "academiquiz1",
+    "storage_bucket": "academiquiz1.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:566183574390:android:c02d95ade0b6dee0f21857",
+        "android_client_info": {
+          "package_name": "com.rar.academiquiz1"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDonLAOgnXcjs7eiYawE_jCNpW2nlDRHrI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
