@@ -602,6 +602,11 @@ class QuizRepository {
     private val db = FirebaseFirestore.getInstance()
     private val collection = db.collection(Quiz.COLLECTION)
 
+    /**
+     * Crea un nuevo quiz en Firestore.
+     * @param quiz El objeto Quiz a guardar.
+     * @return Result con el ID del documento generado.
+     */
     suspend fun crearQuiz(quiz: Quiz): Result<String> {
         return try {
             val docRef = collection.add(quiz).await()
@@ -611,6 +616,11 @@ class QuizRepository {
         }
     }
 
+    /**
+     * Obtiene un quiz por su ID.
+     * @param id ID del quiz.
+     * @return Result con el objeto Quiz (o null si no existe).
+     */
     suspend fun obtenerQuiz(id: String): Result<Quiz?> {
         return try {
             val snapshot = collection.document(id).get().await()
@@ -622,6 +632,11 @@ class QuizRepository {
         }
     }
 
+    /**
+     * Actualiza un quiz existente.
+     * @param quiz Objeto Quiz con los datos actualizados.
+     * @return Result de Unit.
+     */
     suspend fun actualizarQuiz(quiz: Quiz): Result<Unit> {
         return try {
             collection.document(quiz.id_quiz!!).set(quiz).await()
@@ -631,14 +646,22 @@ class QuizRepository {
         }
     }
 
+    /**
+     * Elimina un quiz y todos sus datos relacionados (preguntas, resultados).
+     * @param id ID del quiz a eliminar.
+     * @return Result de Unit.
+     */
     suspend fun eliminarQuiz(id: String): Result<Unit> {
         return try {
+            // Eliminar preguntas asociadas al quiz
             val preguntaRepo = PreguntaRepository()
             preguntaRepo.eliminarPreguntasPorQuiz(id)
             
+            // Eliminar resultados asociados al quiz
             val resultadoRepo = ResultadoRepository()
             resultadoRepo.eliminarResultadosPorQuiz(id)
             
+            // Eliminar el documento del quiz
             collection.document(id).delete().await()
             
             Result.success(Unit)
@@ -647,6 +670,10 @@ class QuizRepository {
         }
     }
 
+    /**
+     * Obtiene todos los quizzes ordenados por título.
+     * @return Result con la lista de quizzes.
+     */
     suspend fun obtenerTodosQuizzes(): Result<List<Quiz>> {
         return try {
             val snapshot = collection
@@ -664,6 +691,10 @@ class QuizRepository {
         }
     }
 
+    /**
+     * Obtiene solo los quizzes marcados como activos.
+     * @return Result con la lista de quizzes activos.
+     */
     suspend fun obtenerQuizzesActivos(): Result<List<Quiz>> {
         return try {
             val snapshot = collection
@@ -681,6 +712,11 @@ class QuizRepository {
         }
     }
 
+    /**
+     * Obtiene los quizzes creados por un usuario específico (Maestro/Admin).
+     * @param idCreador ID del usuario creador.
+     * @return Result con la lista de quizzes.
+     */
     suspend fun obtenerQuizzesPorCreador(idCreador: String): Result<List<Quiz>> {
         return try {
             val snapshot = collection
@@ -698,6 +734,11 @@ class QuizRepository {
         }
     }
 
+    /**
+     * Incrementa el contador de intentos totales de un quiz de forma atómica.
+     * @param idQuiz ID del quiz.
+     * @return Result de Unit.
+     */
     suspend fun incrementarIntentos(idQuiz: String): Result<Unit> {
         return try {
             val quizDoc = collection.document(idQuiz)
@@ -712,6 +753,12 @@ class QuizRepository {
         }
     }
 
+    /**
+     * Actualiza el promedio general de calificaciones de un quiz.
+     * @param idQuiz ID del quiz.
+     * @param nuevoPromedio Nuevo valor del promedio.
+     * @return Result de Unit.
+     */
     suspend fun actualizarPromedio(idQuiz: String, nuevoPromedio: Double): Result<Unit> {
         return try {
             collection.document(idQuiz)
@@ -740,6 +787,11 @@ class UsuarioRepository {
     private val db = FirebaseFirestore.getInstance()
     private val collection = db.collection(Usuario.COLLECTION)
 
+    /**
+     * Crea o actualiza un usuario en Firestore.
+     * @param usuario El objeto Usuario a guardar.
+     * @return Result de Unit.
+     */
     suspend fun crearUsuario(usuario: Usuario): Result<Unit> {
         return try {
             if (usuario.id_usuario != null) {
@@ -753,6 +805,11 @@ class UsuarioRepository {
         }
     }
 
+    /**
+     * Obtiene los datos de un usuario por su ID.
+     * @param id ID del usuario.
+     * @return Result con el objeto Usuario.
+     */
     suspend fun obtenerUsuario(id: String): Result<Usuario?> {
         return try {
             val snapshot = collection.document(id).get().await()
@@ -763,6 +820,11 @@ class UsuarioRepository {
         }
     }
 
+    /**
+     * Actualiza los datos de un usuario existente.
+     * @param usuario Objeto Usuario con nuevos datos.
+     * @return Result de Unit.
+     */
     suspend fun actualizarUsuario(usuario: Usuario): Result<Unit> {
         return try {
             collection.document(usuario.id_usuario!!).set(usuario).await()
@@ -772,6 +834,11 @@ class UsuarioRepository {
         }
     }
     
+    /**
+     * Actualiza la fecha de último acceso del usuario.
+     * @param idUsuario ID del usuario.
+     * @return Result de Unit.
+     */
     suspend fun actualizarUltimoAcceso(idUsuario: String): Result<Unit> {
         return try {
             collection.document(idUsuario)
@@ -783,11 +850,18 @@ class UsuarioRepository {
         }
     }
 
+    /**
+     * Elimina un usuario y todos sus resultados asociados.
+     * @param id ID del usuario a eliminar.
+     * @return Result de Unit.
+     */
     suspend fun eliminarUsuario(id: String): Result<Unit> {
         return try {
+            // Eliminar resultados del usuario primero
             val resultadoRepo = ResultadoRepository()
             resultadoRepo.eliminarResultadosPorUsuario(id)
             
+            // Eliminar el documento del usuario
             collection.document(id).delete().await()
             Result.success(Unit)
         } catch (e: Exception) {
@@ -795,6 +869,10 @@ class UsuarioRepository {
         }
     }
     
+    /**
+     * Obtiene todos los usuarios del sistema.
+     * @return Result con la lista de usuarios.
+     */
     suspend fun obtenerTodosUsuarios(): Result<List<Usuario>> {
         return try {
             val snapshot = collection.get().await()
@@ -805,6 +883,11 @@ class UsuarioRepository {
         }
     }
     
+    /**
+     * Obtiene usuarios filtrados por rol (ESTUDIANTE, MAESTRO, ADMIN).
+     * @param rol Rol a filtrar.
+     * @return Result con la lista de usuarios.
+     */
     suspend fun obtenerUsuariosPorRol(rol: String): Result<List<Usuario>> {
         return try {
             val snapshot = collection.whereEqualTo("rol", rol).get().await()
@@ -831,6 +914,11 @@ class PreguntaRepository {
     private val db = FirebaseFirestore.getInstance()
     private val collection = db.collection(Pregunta.COLLECTION)
 
+    /**
+     * Crea una nueva pregunta en Firebase Firestore.
+     * @param pregunta Objeto Pregunta a guardar.
+     * @return Result con el ID de la pregunta creada.
+     */
     suspend fun crearPregunta(pregunta: Pregunta): Result<String> {
         return try {
             val docRef = collection.add(pregunta).await()
@@ -840,6 +928,11 @@ class PreguntaRepository {
         }
     }
 
+    /**
+     * Obtiene todas las preguntas asociadas a un quiz específico.
+     * @param idQuiz ID del quiz.
+     * @return Result con la lista de preguntas.
+     */
     suspend fun obtenerPreguntasPorQuiz(idQuiz: String): Result<List<Pregunta>> {
         return try {
             val snapshot = collection
@@ -857,6 +950,11 @@ class PreguntaRepository {
         }
     }
 
+    /**
+     * Elimina una pregunta específica por su ID.
+     * @param id ID de la pregunta.
+     * @return Result de Unit.
+     */
     suspend fun eliminarPregunta(id: String): Result<Unit> {
         return try {
             collection.document(id).delete().await()
@@ -866,6 +964,12 @@ class PreguntaRepository {
         }
     }
     
+    /**
+     * Elimina todas las preguntas asociadas a un quiz.
+     * Utiliza un batch para eliminar múltiples documentos eficientemente.
+     * @param idQuiz ID del quiz.
+     * @return Result de Unit.
+     */
     suspend fun eliminarPreguntasPorQuiz(idQuiz: String): Result<Unit> {
         return try {
             val snapshot = collection.whereEqualTo("id_quiz", idQuiz).get().await()
@@ -880,6 +984,11 @@ class PreguntaRepository {
         }
     }
     
+    /**
+     * Actualiza los datos de una pregunta existente.
+     * @param pregunta Objeto Pregunta con los datos actualizados.
+     * @return Result de Unit.
+     */
     suspend fun actualizarPregunta(pregunta: Pregunta): Result<Unit> {
         return try {
             collection.document(pregunta.id_pregunta!!).set(pregunta).await()
@@ -1216,14 +1325,23 @@ class ResultadoRepository {
     private val resultadosCollection = db.collection(Resultado.COLLECTION)
     private val respuestasCollection = db.collection(Respuesta.COLLECTION)
 
+    /**
+     * Guarda un resultado de quiz junto con todas sus respuestas detalladas.
+     * Utiliza una transacción para asegurar la integridad de los datos.
+     * @param resultado Objeto Resultado general.
+     * @param respuestas Lista de objetos Respuesta individuales.
+     * @return Result con el ID del resultado generado.
+     */
     suspend fun crearResultado(resultado: Resultado, respuestas: List<Respuesta>): Result<String> {
         return try {
             val resultadoRef = resultadosCollection.document()
             resultado.id_resultado = resultadoRef.id
             
             db.runTransaction { transaction ->
+                // Guardar el resultado principal
                 transaction.set(resultadoRef, resultado)
                 
+                // Guardar cada respuesta individual
                 for (respuesta in respuestas) {
                     val respuestaRef = respuestasCollection.document()
                     respuesta.id_resultado = resultado.id_resultado
@@ -1237,6 +1355,11 @@ class ResultadoRepository {
         }
     }
 
+    /**
+     * Obtiene los resultados de un usuario específico, ordenados por fecha.
+     * @param idUsuario ID del usuario.
+     * @return Result con la lista de resultados.
+     */
     suspend fun obtenerResultadosPorUsuario(idUsuario: String): Result<List<Resultado>> {
         return try {
             val snapshot = resultadosCollection
@@ -1256,6 +1379,11 @@ class ResultadoRepository {
         }
     }
 
+    /**
+     * Obtiene los resultados de un quiz específico, ordenados por puntaje.
+     * @param idQuiz ID del quiz.
+     * @return Result con la lista de resultados.
+     */
     suspend fun obtenerResultadosPorQuiz(idQuiz: String): Result<List<Resultado>> {
         return try {
             val snapshot = resultadosCollection
@@ -1275,6 +1403,11 @@ class ResultadoRepository {
         }
     }
 
+    /**
+     * Obtiene las respuestas detalladas asociadas a un resultado.
+     * @param idResultado ID del resultado.
+     * @return Result con la lista de respuestas.
+     */
     suspend fun obtenerRespuestasPorResultado(idResultado: String): Result<List<Respuesta>> {
         return try {
             val snapshot = respuestasCollection
@@ -1293,6 +1426,11 @@ class ResultadoRepository {
         }
     }
 
+    /**
+     * Elimina un resultado y sus respuestas asociadas.
+     * @param idResultado ID del resultado a eliminar.
+     * @return Result de Unit.
+     */
     suspend fun eliminarResultado(idResultado: String): Result<Unit> {
         return try {
             val respuestasSnapshot = respuestasCollection
@@ -1313,6 +1451,11 @@ class ResultadoRepository {
         }
     }
 
+    /**
+     * Elimina todos los resultados asociados a un quiz.
+     * @param idQuiz ID del quiz.
+     * @return Result de Unit.
+     */
     suspend fun eliminarResultadosPorQuiz(idQuiz: String): Result<Unit> {
         return try {
             val resultadosSnapshot = resultadosCollection
@@ -1346,6 +1489,11 @@ class ResultadoRepository {
         }
     }
 
+    /**
+     * Elimina todos los resultados asociados a un usuario.
+     * @param idUsuario ID del usuario.
+     * @return Result de Unit.
+     */
     suspend fun eliminarResultadosPorUsuario(idUsuario: String): Result<Unit> {
         return try {
             val resultadosSnapshot = resultadosCollection
@@ -1399,11 +1547,21 @@ class GeminiRepository(private val apiKey: String) {
 
     private val models = listOf("gemini-2.0-flash", "gemini-flash-latest", "gemini-pro-latest")
 
+    /**
+     * Genera un quiz automáticamente utilizando Google Gemini AI.
+     * Intenta con varios modelos si el primero falla.
+     * 
+     * @param topic Tema del quiz.
+     * @param numQuestions Número de preguntas a generar.
+     * @param difficulty Nivel de dificultad (fácil, intermedio, difícil).
+     * @return Result con la lista de preguntas generadas.
+     */
     suspend fun generateQuiz(topic: String, numQuestions: Int, difficulty: String = "intermedio"): Result<List<Pregunta>> {
         var lastException: Exception? = null
 
         for (modelName in models) {
             try {
+                // Prompt diseñado para obtener una respuesta JSON estructurada
                 val prompt = """
                     Genera un examen de $numQuestions preguntas de opción múltiple sobre el tema "$topic" con dificultad $difficulty.
                     El formato de salida DEBE ser estrictamente un Array JSON válido.
@@ -1432,6 +1590,12 @@ class GeminiRepository(private val apiKey: String) {
         return Result.failure(lastException ?: Exception("No se pudo generar el quiz con ningún modelo"))
     }
 
+    /**
+     * Realiza una llamada HTTP directa a la API de Gemini (en lugar de usar la SDK para menor dependencia).
+     * @param prompt El texto del prompt.
+     * @param model El nombre del modelo a usar.
+     * @return El texto generado por la IA.
+     */
     private suspend fun callGeminiApi(prompt: String, model: String): String {
         return kotlinx.coroutines.Dispatchers.IO.run {
             kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
@@ -1441,6 +1605,7 @@ class GeminiRepository(private val apiKey: String) {
                 connection.setRequestProperty("Content-Type", "application/json")
                 connection.doOutput = true
 
+                // Construcción manual del JSON request body
                 val jsonBody = JSONObject().apply {
                     put("contents", JSONArray().put(JSONObject().apply {
                         put("parts", JSONArray().put(JSONObject().apply {
@@ -1494,6 +1659,9 @@ class GeminiRepository(private val apiKey: String) {
         }
     }
 
+    /**
+     * Limpia la respuesta de texto para eliminar bloques de código markdown si existen.
+     */
     private fun cleanResponseText(text: String): String {
         var cleaned = text.trim()
         if (cleaned.startsWith("```json")) {
@@ -1515,6 +1683,9 @@ class GeminiRepository(private val apiKey: String) {
         return cleaned.trim()
     }
 
+    /**
+     * Parsea el string JSON a una lista de objetos Pregunta.
+     */
     private fun parseJsonToPreguntas(jsonString: String): List<Pregunta> {
         val listaPreguntas = mutableListOf<Pregunta>()
         try {
@@ -1596,7 +1767,7 @@ class LoginActivity : AppCompatActivity() {
         usuarioRepository = UsuarioRepository()
         sessionManager = SessionManager(this)
 
-        // Verificar si ya hay sesión activa
+        // Verificar si ya hay sesión activa para redirigir automáticamente
         if (sessionManager.isLoggedIn() && auth.currentUser != null) {
             irAlDashboard()
             return
@@ -1622,6 +1793,9 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Autentica al usuario con Firebase Auth.
+     */
     private fun loginUser(email: String, password: String) {
         auth.signInWithEmailAndPassword(email, password)
             .addOnCompleteListener(this) { task ->
@@ -1636,6 +1810,9 @@ class LoginActivity : AppCompatActivity() {
             }
     }
 
+    /**
+     * Obtiene los datos adicionales del usuario desde Firestore y guarda la sesión.
+     */
     private fun obtenerDatosUsuario(userId: String) {
         lifecycleScope.launch {
             val result = usuarioRepository.obtenerUsuario(userId)
@@ -1808,6 +1985,9 @@ class DashboardActivity : AppCompatActivity() {
         cargarEstadisticas()
     }
 
+    /**
+     * Configura la interfaz de usuario basándose en el rol del usuario (Estudiante, Maestro, Admin).
+     */
     private fun setupUI() {
         val userName = sessionManager.getUserName()
         val userRole = sessionManager.getUserRol()
@@ -1815,7 +1995,7 @@ class DashboardActivity : AppCompatActivity() {
         binding.tvWelcome.text = "Hola, $userName"
         binding.tvRole.text = userRole
 
-        // Configurar visibilidad según rol
+        // Configurar visibilidad de elementos según rol
         if (userRole == "ESTUDIANTE") {
             binding.fabCreateQuiz.visibility = View.GONE
             binding.cardManageUsers.visibility = View.GONE
@@ -1823,7 +2003,7 @@ class DashboardActivity : AppCompatActivity() {
             binding.fabCreateQuiz.visibility = View.VISIBLE
             binding.cardManageUsers.visibility = View.GONE
         } else {
-            // ADMIN
+            // ADMIN tiene acceso total
             binding.fabCreateQuiz.visibility = View.VISIBLE
             binding.cardManageUsers.visibility = View.VISIBLE
         }
@@ -1855,6 +2035,10 @@ class DashboardActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Carga estadísticas relevantes para el dashboard.
+     * Diferencia entre estudiantes (sus resultados) y maestros (sus quizzes).
+     */
     private fun cargarEstadisticas() {
         val userId = sessionManager.getUserId() ?: return
         val userRole = sessionManager.getUserRol()
@@ -1869,7 +2053,7 @@ class DashboardActivity : AppCompatActivity() {
                 binding.tvStat2Value.text = String.format("%.1f", promedio)
                 binding.tvStat2Label.text = "Promedio General"
             } else {
-                // Maestro/Admin
+                // Lógica para Maestro/Admin
                 val quizzes = if (userRole == "ADMIN") {
                     quizRepository.obtenerTodosQuizzes().getOrDefault(emptyList())
                 } else {
@@ -1902,6 +2086,7 @@ class DashboardActivity : AppCompatActivity() {
     
     override fun onResume() {
         super.onResume()
+        // Recargar estadísticas al volver al dashboard
         cargarEstadisticas()
     }
 }
@@ -1955,6 +2140,7 @@ class CreateQuizActivity : AppCompatActivity() {
 
         quizRepository = QuizRepository()
         preguntaRepository = PreguntaRepository()
+        // Inicializar repositorio de IA con API Key
         // REEMPLAZAR CON TU API KEY REAL O USAR REMOTE CONFIG
         geminiRepository = GeminiRepository("AIzaSyBwMQK0VPmkyT7DeU92Om4Jl4s5qFUJR4w") 
         sessionManager = SessionManager(this)
@@ -1963,7 +2149,7 @@ class CreateQuizActivity : AppCompatActivity() {
         setupRecyclerView()
         setupListeners()
         
-        // Verificar si es edición
+        // Verificar si se recibió un quiz para edición
         if (intent.hasExtra(Constants.INTENT_QUIZ)) {
             val quiz = intent.getParcelableExtra<Quiz>(Constants.INTENT_QUIZ)
             if (quiz != null) {
@@ -1989,6 +2175,8 @@ class CreateQuizActivity : AppCompatActivity() {
         binding.rvQuestions.layoutManager = LinearLayoutManager(this)
         binding.rvQuestions.adapter = preguntaAdapter
     }
+   
+   
 
     private fun setupListeners() {
         binding.btnAddQuestionManual.setOnClickListener {
@@ -2004,12 +2192,16 @@ class CreateQuizActivity : AppCompatActivity() {
         }
     }
 
+   
+    /**
+     * Carga los datos del quiz en la UI si estamos en modo edición.
+     */
     private fun cargarDatosQuiz() {
         binding.etTitle.setText(quizActual.titulo)
         binding.etDuration.setText(quizActual.duracion_min.toString())
         binding.switchActive.isChecked = quizActual.isActivo
         
-        // Cargar preguntas si no vienen en el objeto
+        // Cargar preguntas si no vienen en el objeto (lazy loading)
         if (quizActual.preguntas.isEmpty() && quizActual.id_quiz != null) {
             lifecycleScope.launch {
                 val result = preguntaRepository.obtenerPreguntasPorQuiz(quizActual.id_quiz!!)
@@ -2025,6 +2217,9 @@ class CreateQuizActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Muestra un diálogo para agregar manualmente una nueva pregunta.
+     */
     private fun mostrarDialogoAgregarPregunta() {
         val dialogBinding = DialogAddQuestionBinding.inflate(layoutInflater)
         
@@ -2068,6 +2263,9 @@ class CreateQuizActivity : AppCompatActivity() {
         // Por brevedad, omitido en este ejemplo completo
     }
 
+    /**
+     * Muestra el diálogo para configurar la generación de preguntas con IA.
+     */
     private fun mostrarDialogoGenerarIA() {
         val view = layoutInflater.inflate(R.layout.dialog_generate_ai, null)
         val etTopic = view.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.etTopic)
@@ -2093,6 +2291,9 @@ class CreateQuizActivity : AppCompatActivity() {
             .show()
     }
 
+    /**
+     * Llama al repositorio de Gemini para generar preguntas y las añade al quiz.
+     */
     private fun generarPreguntasIA(topic: String, count: Int, difficulty: String) {
         binding.progressBar.visibility = View.VISIBLE
         binding.contentLayout.alpha = 0.5f
@@ -2114,6 +2315,9 @@ class CreateQuizActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Guarda el quiz en Firestore, ya sea creándolo o actualizándolo.
+     */
     private fun guardarQuiz() {
         val titulo = binding.etTitle.text.toString()
         val duracionStr = binding.etDuration.text.toString()
@@ -2142,13 +2346,7 @@ class CreateQuizActivity : AppCompatActivity() {
         lifecycleScope.launch {
             if (isEditMode) {
                 // Actualizar quiz existente
-                // Primero actualizar datos básicos
                 quizRepository.actualizarQuiz(quizActual)
-                
-                // Luego manejar preguntas (podría requerir lógica más compleja de diff, 
-                // aquí simplificamos borrando y recreando o solo agregando nuevas)
-                // Para simplificar este ejemplo, asumimos que se guardan las preguntas nuevas
-                // En una app real, se debería gestionar mejor la actualización de preguntas
                 
                 // Guardar preguntas nuevas (sin ID)
                 quizActual.preguntas.filter { it.id_pregunta == null }.forEach { pregunta ->
@@ -2161,7 +2359,7 @@ class CreateQuizActivity : AppCompatActivity() {
                 // Crear nuevo quiz
                 val result = quizRepository.crearQuiz(quizActual)
                 result.onSuccess { quizId ->
-                    // Guardar todas las preguntas
+                    // Guardar todas las preguntas asignándoles el nuevo ID del quiz
                     quizActual.preguntas.forEach { pregunta ->
                         pregunta.id_quiz = quizId
                         preguntaRepository.crearPregunta(pregunta)
@@ -2229,6 +2427,7 @@ class TakeQuizActivity : AppCompatActivity() {
         binding = ActivityTakeQuizBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        // Recuperar objeto Quiz del Intent
         quiz = intent.getParcelableExtra(Constants.INTENT_QUIZ) ?: run {
             finish()
             return
@@ -2259,8 +2458,8 @@ class TakeQuizActivity : AppCompatActivity() {
 
     private fun setupRecyclerView() {
         preguntaAdapter = PreguntaAdapter { pregunta, opcion ->
-            // Guardar respuesta seleccionada
-            // Usamos el enunciado como clave si el ID es nulo (caso temporal)
+            // Callback al seleccionar una opción
+            // Guardar respuesta seleccionada temporalmente
             val key = pregunta.id_pregunta ?: pregunta.enunciado ?: ""
             respuestasUsuario[key] = opcion
             actualizarProgreso()
@@ -2269,6 +2468,9 @@ class TakeQuizActivity : AppCompatActivity() {
         binding.rvQuestions.adapter = preguntaAdapter
     }
 
+    /**
+     * Carga las preguntas del quiz desde Firestore y luego inicia el temporizador.
+     */
     private fun cargarPreguntas() {
         binding.progressBar.visibility = View.VISIBLE
         
@@ -2289,6 +2491,9 @@ class TakeQuizActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Inicia el temporizador de cuenta regresiva basado en la duración del quiz.
+     */
     private fun iniciarTemporizador() {
         val duracionMs = quiz.duracion_min * 60 * 1000L
         
@@ -2299,7 +2504,8 @@ class TakeQuizActivity : AppCompatActivity() {
                 val segundos = (millisUntilFinished / 1000) % 60
                 binding.tvTimer.text = String.format("%02d:%02d", minutos, segundos)
                 
-                if (millisUntilFinished < 60000) { // Menos de 1 min
+                // Cambiar color a rojo si queda menos de 1 minuto
+                if (millisUntilFinished < 60000) {
                     binding.tvTimer.setTextColor(getColor(android.R.color.holo_red_dark))
                 }
             }
@@ -2338,6 +2544,9 @@ class TakeQuizActivity : AppCompatActivity() {
             .show()
     }
 
+    /**
+     * Calcula el puntaje final, genera el objeto Resultado y lo guarda en Firestore.
+     */
     private fun enviarRespuestas() {
         countDownTimer?.cancel()
         binding.btnSubmit.isEnabled = false
@@ -2356,7 +2565,7 @@ class TakeQuizActivity : AppCompatActivity() {
                 puntajeTotal += pregunta.puntaje
             }
 
-            // Crear objeto Respuesta
+            // Crear objeto Respuesta detallada
             if (opcionSeleccionada != null) {
                 respuestasParaGuardar.add(Respuesta(
                     id_pregunta = pregunta.id_pregunta,
@@ -2366,7 +2575,7 @@ class TakeQuizActivity : AppCompatActivity() {
             }
         }
 
-        // Normalizar puntaje a 0-100
+        // Normalizar puntaje a 0-100 para consistencia
         val puntajeMaximo = preguntas.sumOf { it.puntaje }
         val puntajeFinal = if (puntajeMaximo > 0) (puntajeTotal / puntajeMaximo) * 100 else 0.0
 
@@ -2380,12 +2589,11 @@ class TakeQuizActivity : AppCompatActivity() {
         )
 
         lifecycleScope.launch {
+            // Guardar resultado y respuestas
             val result = resultadoRepository.crearResultado(resultado, respuestasParaGuardar)
             
-            // Actualizar estadísticas del quiz
+            // Actualizar estadísticas globales del quiz
             quizRepository.incrementarIntentos(quiz.id_quiz!!)
-            // Nota: El promedio se debería actualizar en el servidor o con una función más compleja
-            // Aquí solo incrementamos intentos por simplicidad
             
             binding.progressBar.visibility = View.GONE
             
@@ -2484,6 +2692,9 @@ class ResultsActivity : AppCompatActivity() {
         binding.rvResults.adapter = resultAdapter
     }
 
+    /**
+     * Carga el historial de resultados del usuario.
+     */
     private fun cargarResultados() {
         val userId = sessionManager.getUserId() ?: return
         binding.progressBar.visibility = View.VISIBLE
@@ -2502,7 +2713,7 @@ class ResultsActivity : AppCompatActivity() {
                     binding.rvResults.visibility = View.VISIBLE
                     resultAdapter.submitList(resultados)
                     
-                    // Calcular promedio
+                    // Calcular promedio simple para mostrar al usuario
                     val promedio = resultados.map { it.puntaje }.average()
                     binding.tvAverage.text = "Promedio General: ${String.format("%.1f%%", promedio)}"
                 }
@@ -2577,6 +2788,9 @@ class ResultDetailsActivity : AppCompatActivity() {
         binding.rvDetails.adapter = adapter
     }
 
+    /**
+     * Carga las preguntas del quiz y las respuestas del usuario para mostrarlas combinadas.
+     */
     private fun cargarDetalles() {
         binding.progressBar.visibility = View.VISIBLE
 
@@ -2598,6 +2812,9 @@ class ResultDetailsActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Combina la lista de preguntas con las respuestas dadas para la visualización.
+     */
     private fun combinarDatos(preguntas: List<Pregunta>, respuestas: List<Respuesta>) {
         val detailItems = preguntas.map { pregunta ->
             val respuesta = respuestas.find { it.id_pregunta == pregunta.id_pregunta }
@@ -2650,6 +2867,7 @@ class UsersManagementActivity : AppCompatActivity() {
     private lateinit var usuarioRepository: UsuarioRepository
     private lateinit var usuarioAdapter: UsuarioAdapter
     
+    // Listas para manejar el filtrado local
     private var allUsuarios = listOf<Usuario>()
     private var filteredUsuarios = listOf<Usuario>()
 
@@ -2698,6 +2916,9 @@ class UsersManagementActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Carga todos los usuarios desde Firestore.
+     */
     private fun cargarUsuarios() {
         binding.progressBar.visibility = View.VISIBLE
         lifecycleScope.launch {
@@ -2714,6 +2935,9 @@ class UsersManagementActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Filtra la lista de usuarios localmente por nombre o email.
+     */
     private fun filtrarUsuarios(query: String) {
         filteredUsuarios = if (query.isEmpty()) {
             allUsuarios
@@ -2763,8 +2987,11 @@ class UsersManagementActivity : AppCompatActivity() {
             .show()
     }
 
+    /**
+     * Crea un usuario en Firestore. 
+     * Nota: La creación en Auth idealmente debería ser desde backend para no cerrar sesión actual.
+     */
     private fun crearUsuarioEnFirebase(nombre: String, email: String, pass: String, rol: String) {
-        // Nota: Crear usuario en Firebase Auth desde cliente desconecta la sesión actual
         // En una app real, esto debería hacerse desde un Cloud Function (Backend)
         // Aquí simulamos el proceso o advertimos al admin
         
@@ -2942,6 +3169,9 @@ class QuizListActivity : AppCompatActivity() {
         })
     }
 
+    /**
+     * Carga la lista de quizzes disponibles basándose en el rol del usuario.
+     */
     private fun cargarQuizzes() {
         mostrarCargando(true)
         
@@ -3009,24 +3239,18 @@ class QuizListActivity : AppCompatActivity() {
             return
         }
         
-        android.util.Log.d("QuizListActivity", "Intentando eliminar quiz: ${quiz.titulo} (ID: ${quiz.id_quiz})")
-        
         androidx.appcompat.app.AlertDialog.Builder(this)
             .setTitle("Eliminar Quiz")
             .setMessage("¿Estás seguro de eliminar '${quiz.titulo}'?")
             .setPositiveButton("Eliminar") { dialog, _ ->
-                android.util.Log.d("QuizListActivity", "Usuario confirmó eliminación")
                 lifecycleScope.launch {
                     try {
-                        android.util.Log.d("QuizListActivity", "Llamando a quizRepository.eliminarQuiz(${quiz.id_quiz})")
                         val result = quizRepository.eliminarQuiz(quiz.id_quiz!!)
                         
                         result.onSuccess {
-                            android.util.Log.d("QuizListActivity", "Quiz eliminado exitosamente")
                             Toast.makeText(this@QuizListActivity, "Quiz eliminado", Toast.LENGTH_SHORT).show()
                             cargarQuizzes()
                         }.onFailure { e ->
-                            android.util.Log.e("QuizListActivity", "Error al eliminar quiz", e)
                             Toast.makeText(
                                 this@QuizListActivity, 
                                 "Error al eliminar: ${e.message}", 
@@ -3034,7 +3258,6 @@ class QuizListActivity : AppCompatActivity() {
                             ).show()
                         }
                     } catch (e: Exception) {
-                        android.util.Log.e("QuizListActivity", "Excepción inesperada al eliminar", e)
                         Toast.makeText(
                             this@QuizListActivity, 
                             "Error inesperado: ${e.message}", 
@@ -3045,7 +3268,6 @@ class QuizListActivity : AppCompatActivity() {
                 dialog.dismiss()
             }
             .setNegativeButton("Cancelar") { dialog, _ ->
-                android.util.Log.d("QuizListActivity", "Usuario canceló eliminación")
                 dialog.dismiss()
             }
             .show()
@@ -3116,6 +3338,9 @@ class SettingsActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Configura la información visual del perfil y oculta estadísticas si el usuario no es estudiante.
+     */
     private fun setupUI() {
         val userName = sessionManager.getUserName() ?: "Usuario"
         val userEmail = sessionManager.getUserEmail() ?: "email@example.com"
