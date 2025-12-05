@@ -1,0 +1,53 @@
+<resources>
+    <string name="app_name">AcademiQuiz1</string>
+    <string name="iniciar_sesion">Iniciar Sesión</string>
+    <string name="registrarse">Registrarse</string>
+    <string name="correo_electronico">Correo electrónico</string>
+    <string name="contrasena">Contraseña</string>
+    <string name="nombre_completo">Nombre completo</string>
+    <string name="dashboard">Dashboard</string>
+    <string name="cuestionarios">Cuestionarios</string>
+    <string name="resultados">Resultados</string>
+    <string name="configuracion">Configuración</string>
+    <string name="usuarios">Usuarios</string>
+    <string name="cerrar_sesion">Cerrar Sesión</string>
+    <string name="iniciar_quiz">Iniciar Quiz</string>
+    <string name="crear_cuestionario">Crear Cuestionario</string>
+    <string name="editar_cuestionario">Editar Cuestionario</string>
+    <string name="eliminar_cuestionario">Eliminar Cuestionario</string>
+    <string name="mis_cuestionarios">Mis Cuestionarios</string>
+    <string name="cuestionarios_disponibles">Cuestionarios Disponibles</string>
+    <string name="preguntas">Preguntas</string>
+    <string name="min">min</string>
+    <string name="intentos">Intentos</string>
+    <string name="promedio">Promedio</string>
+    <string name="calificacion">Calificación</string>
+    <string name="tiempo">Tiempo</string>
+    <string name="activo">Activo</string>
+    <string name="inactivo">Inactivo</string>
+    <string name="estudiante">Estudiante</string>
+    <string name="profesor">Profesor</string>
+    <string name="administrador">Administrador</string>
+    <string name="seleccionar_rol">Seleccionar rol</string>
+    <string name="nombre_institucion">Nombre de la institución</string>
+    <string name="notificaciones">Notificaciones</string>
+    <string name="activar_notificaciones">Activar notificaciones</string>
+    <string name="guardar_cambios">Guardar Cambios</string>
+    <string name="cancelar">Cancelar</string>
+    <string name="crear">Crear</string>
+    <string name="actualizar">Actualizar</string>
+    <string name="eliminar">Eliminar</string>
+    <string name="confirmar">Confirmar</string>
+    <string name="cargando">Cargando...</string>
+    <string name="error">Error</string>
+    <string name="exito">Éxito</string>
+
+
+    <string name="email">Correo electrónico</string>
+    <string name="password">Contraseña</string>
+    <string name="login">Iniciar Sesión</string>
+    <string name="register">Registrarse</string>
+    <string name="name">Nombre</string>
+    <string name="select_role">Seleccionar Rol</string>
+    <string name="start_quiz">Comenzar Quiz</string>
+</resources>
